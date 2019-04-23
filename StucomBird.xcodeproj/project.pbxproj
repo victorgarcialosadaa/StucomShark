@@ -15,6 +15,11 @@
 		33138ACB207CCFDE0035F4E3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 33138AC9207CCFDE0035F4E3 /* Main.storyboard */; };
 		33138ACD207CCFDE0035F4E3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33138ACC207CCFDE0035F4E3 /* Assets.xcassets */; };
 		33138AD0207CCFDE0035F4E3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 33138ACE207CCFDE0035F4E3 /* LaunchScreen.storyboard */; };
+		33138ADC207CD4EB0035F4E3 /* fly1.png in Resources */ = {isa = PBXBuildFile; fileRef = 33138AD7207CD4EA0035F4E3 /* fly1.png */; };
+		33138ADD207CD4EB0035F4E3 /* Tubo1.png in Resources */ = {isa = PBXBuildFile; fileRef = 33138AD8207CD4EB0035F4E3 /* Tubo1.png */; };
+		33138ADE207CD4EB0035F4E3 /* fondo.png in Resources */ = {isa = PBXBuildFile; fileRef = 33138AD9207CD4EB0035F4E3 /* fondo.png */; };
+		33138ADF207CD4EB0035F4E3 /* Tubo2.png in Resources */ = {isa = PBXBuildFile; fileRef = 33138ADA207CD4EB0035F4E3 /* Tubo2.png */; };
+		33138AE0207CD4EB0035F4E3 /* fly2.png in Resources */ = {isa = PBXBuildFile; fileRef = 33138ADB207CD4EB0035F4E3 /* fly2.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +33,11 @@
 		33138ACC207CCFDE0035F4E3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		33138ACF207CCFDE0035F4E3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		33138AD1207CCFDE0035F4E3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		33138AD7207CD4EA0035F4E3 /* fly1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fly1.png; sourceTree = "<group>"; };
+		33138AD8207CD4EB0035F4E3 /* Tubo1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Tubo1.png; sourceTree = "<group>"; };
+		33138AD9207CD4EB0035F4E3 /* fondo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fondo.png; sourceTree = "<group>"; };
+		33138ADA207CD4EB0035F4E3 /* Tubo2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Tubo2.png; sourceTree = "<group>"; };
+		33138ADB207CD4EB0035F4E3 /* fly2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fly2.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +76,11 @@
 				33138AC5207CCFDE0035F4E3 /* GameScene.swift */,
 				33138AC7207CCFDE0035F4E3 /* GameViewController.swift */,
 				33138AC9207CCFDE0035F4E3 /* Main.storyboard */,
+				33138AD7207CD4EA0035F4E3 /* fly1.png */,
+				33138ADB207CD4EB0035F4E3 /* fly2.png */,
+				33138AD9207CD4EB0035F4E3 /* fondo.png */,
+				33138AD8207CD4EB0035F4E3 /* Tubo1.png */,
+				33138ADA207CD4EB0035F4E3 /* Tubo2.png */,
 				33138ACC207CCFDE0035F4E3 /* Assets.xcassets */,
 				33138ACE207CCFDE0035F4E3 /* LaunchScreen.storyboard */,
 				33138AD1207CCFDE0035F4E3 /* Info.plist */,
@@ -134,9 +149,14 @@
 			files = (
 				33138ACB207CCFDE0035F4E3 /* Main.storyboard in Resources */,
 				33138AC2207CCFDE0035F4E3 /* GameScene.sks in Resources */,
+				33138ADE207CD4EB0035F4E3 /* fondo.png in Resources */,
 				33138ACD207CCFDE0035F4E3 /* Assets.xcassets in Resources */,
+				33138ADD207CD4EB0035F4E3 /* Tubo1.png in Resources */,
 				33138AD0207CCFDE0035F4E3 /* LaunchScreen.storyboard in Resources */,
+				33138AE0207CD4EB0035F4E3 /* fly2.png in Resources */,
+				33138ADF207CD4EB0035F4E3 /* Tubo2.png in Resources */,
 				33138AC4207CCFDE0035F4E3 /* Actions.sks in Resources */,
+				33138ADC207CD4EB0035F4E3 /* fly1.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

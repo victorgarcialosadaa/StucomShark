@@ -25,17 +25,21 @@ class GameViewController: UIViewController {
                 view.presentScene(scene)
             }
             
+            
             view.ignoresSiblingOrder = true
             
+            // minimo 24 o 30 (óptimo 60 ¿?)
             view.showsFPS = true
             view.showsNodeCount = true
         }
     }
 
+    
     override var shouldAutorotate: Bool {
         return true
     }
 
+    
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         if UIDevice.current.userInterfaceIdiom == .phone {
             return .allButUpsideDown
