@@ -96,13 +96,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Nos encargamos de las colisiones de nuestros nodos
         self.physicsWorld.contactDelegate = self
        reiniciar()
-      
        
     }
     
     func reiniciar() {
         // Creamos los tubos de manera constante e indefinidamente
         timer = Timer.scheduledTimer(timeInterval: 4, target: self, selector: #selector(self.setObstacles), userInfo: nil, repeats: true)
+    let hazardTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.addHazard), userInfo: nil, repeats: true)
         
         // Ponemos la etiqueta con la puntuacion
         ponerPuntuacion()
@@ -126,7 +126,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         labelPuntuacion.position = CGPoint(x: self.frame.midX, y: self.frame.midY + 500)
         labelPuntuacion.zPosition = 2
         self.addChild(labelPuntuacion)
+        
     }
+    
+   
     
    
     @objc func setObstacles() {
@@ -358,40 +361,47 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
    
     
-    func addHazard() {
+    @objc func addHazard() {
         // Random image
         hazards = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: hazards) as! [String]
         let imageName = hazards[0]
-        let alien = SKSpriteNode(imageNamed: imageName)
-        alien.userData = [ "alienType": imageName ]
+        let hazard = SKSpriteNode(imageNamed: imageName)
+        hazard.setScale(0.1)
+        
+        hazard.userData = [ "hazardType": imageName ]
         // Random position
-        let randomAlienPosition = GKRandomDistribution(lowestValue: Int(self.frame.minY + alien.size.height), highestValue: Int(self.frame.maxY - alien.size.height))
-        let position = CGFloat(randomAlienPosition.nextInt())
-        alien.position = CGPoint(x: self.frame.maxX + alien.size.width, y: position)
+        let randomHazardPosition = GKRandomDistribution(lowestValue: Int(self.frame.minY + hazard.size.height), highestValue: Int(self.frame.maxY + hazard.size.height))
+        let position = CGFloat(randomHazardPosition.nextInt())
+        hazard.zPosition = 1
+        //hazard.position = CGPoint(x: self.frame.maxX + hazard.size.width, y: position)
+        hazard.position = CGPoint(x:self.frame.maxX  ,y: position)
         // Physical properties
-        alien.physicsBody = SKPhysicsBody(rectangleOf: alien.size)
-        alien.physicsBody?.isDynamic = true
+    let mine = SKTexture(imageNamed: "mine")
+        hazard.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "mine"), alphaThreshold: 0.5, size: hazard.size)
+        hazard.physicsBody?.isDynamic = true
         // Collision mask
-        alien.physicsBody?.categoryBitMask = hazardCategory
-        alien.physicsBody?.contactTestBitMask = photonTorperdoCategory | playerCategory
-        alien.physicsBody?.collisionBitMask = 0
-        self.addChild(alien)
+        hazard.physicsBody?.categoryBitMask = hazardCategory
+        hazard.physicsBody?.contactTestBitMask = photonTorperdoCategory | playerCategory
+        hazard.physicsBody?.collisionBitMask = 0
+        hazard.physicsBody?.affectedByGravity = false
+        self.addChild(hazard)
         // Alien basic movement
         let animationDuration:TimeInterval = 6
-        let actionMove = SKAction.moveBy(x: 0, y: -self.frame.maxY + 2*alien.size.height, duration: animationDuration)
+        let actionMove = SKAction.moveBy(x:-self.frame.maxX, y: 0, duration: animationDuration)
         let actionRemove = SKAction.removeFromParent()
-        let actionTopDown = SKAction.sequence([ actionMove, actionRemove ])
+        let actionLeftRight = SKAction.sequence([ actionMove, actionRemove ])
         if imageName != "alien4" {
             // SIMPLE: Top-down movement & Remove after
-            alien.run(actionTopDown)
+            hazard.run(actionLeftRight)
         }
         else {
             // COMPLEX: SIMPLE + Left-to-right oscillation & Sprite animation
             // Load from Actions.sks
             let alien4 = SKAction.init(named: "Alien4")!
             // Execute simultaneously
-            alien.run(SKAction.group([alien4, actionTopDown]))
-        }}
+            hazard.run(SKAction.group([alien4, actionLeftRight]))
+        }
+    }
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
