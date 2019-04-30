@@ -101,8 +101,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func reiniciar() {
         // Creamos los tubos de manera constante e indefinidamente
-        timer = Timer.scheduledTimer(timeInterval: 4, target: self, selector: #selector(self.setObstacles), userInfo: nil, repeats: true)
-    let hazardTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.addHazard), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(self.setObstacles), userInfo: nil, repeats: true)
+    let hazardTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(self.addHazard), userInfo: nil, repeats: true)
         
         // Ponemos la etiqueta con la puntuacion
         ponerPuntuacion()
@@ -113,7 +113,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         sharkAnimation()
         // Definimos la altura de los huecos
-        alturaHueco = mosquita.size.height * 1.2
+        alturaHueco = mosquita.size.height * 2
         crearFondoConAnimacion()
         crearSuelo()
         setObstacles()
@@ -135,14 +135,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     @objc func setObstacles() {
         
         // Acción para mover los tubos
-        let moverTubos = SKAction.move(by: CGVector(dx: -3 * self.frame.width, dy: 0), duration: TimeInterval(self.frame.width / 80))
+        let moveObstacles = SKAction.move(by: CGVector(dx: -3 * self.frame.width, dy: 0), duration: TimeInterval(self.frame.width / 80))
         
         // Acción para borrar los tubos cuando desaparecen de la pantalla para no tener infinitos nodos en la aplicación
-        let borrarTubos = SKAction.removeFromParent()
+        let deleteObstacles = SKAction.removeFromParent()
         
         
         // Acción que enlaza las dos acciones (la que pone tubos y la que los borra)
-        let moverBorrarTubos = SKAction.sequence([moverTubos, borrarTubos])
+        let moveDeleteObstacles = SKAction.sequence([moveObstacles, deleteObstacles])
         
         // Numero entre 0 y la mitad de alto de la pantalla (para que los tubos aparezcan a alturas diferentes)
         cantidadAleatoria = CGFloat(arc4random() % UInt32(self.frame.height/2))
@@ -150,34 +150,34 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Compensación para evitar que a veces salga un único tubo porque el otro está fuera de la pantalla
         compensacionTubos = cantidadAleatoria - self.frame.height / 4
         
-        texturaTubo1 = SKTexture(imageNamed: "hook2.png")
-        tubo1 = SKSpriteNode(texture: texturaTubo1)
-        tubo1.position = CGPoint(x: self.frame.midX + self.frame.width, y: self.frame.midY + texturaTubo1.size().height / 2 + alturaHueco + compensacionTubos)
-        tubo1.zPosition = 0
+        let hookTexture = SKTexture(imageNamed: "hook2.png")
+        let hook = SKSpriteNode(texture: hookTexture)
+        hook.position = CGPoint(x: self.frame.midX + self.frame.width, y: self.frame.midY + hookTexture.size().height / 2 + alturaHueco + compensacionTubos)
+        hook.zPosition = 0
         
         // Le damos cuerpo físico al tubo
-        tubo1.physicsBody = SKPhysicsBody(rectangleOf: texturaTubo1.size())
+        hook.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "hook2"), alphaThreshold: 0.5, size: hook.size)
         // Para que no caiga
-        tubo1.physicsBody!.isDynamic = false
+        hook.physicsBody!.isDynamic = false
         
         // Categoría de collision
-        tubo1.physicsBody!.categoryBitMask = tipoNodo.tuboSuelo.rawValue
+        hook.physicsBody!.categoryBitMask = tipoNodo.tuboSuelo.rawValue
         
         // con quien colisiona
-        tubo1.physicsBody!.collisionBitMask = tipoNodo.mosquita.rawValue
+        hook.physicsBody!.collisionBitMask = tipoNodo.mosquita.rawValue
         
         // Hace contacto con
-        tubo1.physicsBody!.contactTestBitMask = tipoNodo.mosquita.rawValue
+        hook.physicsBody!.contactTestBitMask = tipoNodo.mosquita.rawValue
         
-        tubo1.run(moverBorrarTubos)
+        hook.run(moveDeleteObstacles)
         
-        self.addChild(tubo1)
+        self.addChild(hook)
         
         texturaTubo2 = SKTexture(imageNamed: "ship.png")
-        tubo2 = SKSpriteNode(texture: texturaTubo2)
+        tubo2.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "ship"), alphaThreshold: 0.5, size: tubo2.size)
         tubo2.position = CGPoint(x: self.frame.midX + self.frame.width, y: self.frame.midY - texturaTubo2.size().height / 2 - alturaHueco + compensacionTubos)
         tubo2.zPosition = 0
-        tubo2.run(moverBorrarTubos)
+        tubo2.run(moveDeleteObstacles)
         tubo2.physicsBody = SKPhysicsBody(rectangleOf: texturaTubo2.size())
         tubo2.physicsBody!.isDynamic = false
         tubo2.physicsBody!.categoryBitMask = tipoNodo.tuboSuelo.rawValue
@@ -189,7 +189,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let nodoHueco = SKSpriteNode()
         
         nodoHueco.position = CGPoint(x: self.frame.midX + self.frame.width, y: self.frame.midY + compensacionTubos)
-        nodoHueco.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: texturaTubo1.size().width, height: alturaHueco))
+        nodoHueco.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: hookTexture.size().width, height: alturaHueco))
         nodoHueco.physicsBody!.isDynamic = false
         
         // Asignamos su categoría
@@ -200,7 +200,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         nodoHueco.physicsBody!.contactTestBitMask = tipoNodo.mosquita.rawValue
         
         nodoHueco.zPosition = 1
-        nodoHueco.run(moverBorrarTubos)
+        nodoHueco.run(moveDeleteObstacles)
         
         self.addChild(nodoHueco)
         
@@ -269,8 +269,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Asignamos las texturas de la mosquita
         texturaMosca1 = SKTexture(imageNamed: "sharkv1.png")
         texturaMosca2 = SKTexture(imageNamed: "sharkv1.png")
-        texturaMosca3 = SKTexture(imageNamed: "sharkv1.png")
-        texturaMosca4 = SKTexture(imageNamed: "sharkv1.png")
+        texturaMosca3 = SKTexture(imageNamed: "sharkv4.png")
+        texturaMosca4 = SKTexture(imageNamed: "sharkv4.png")
         
         // Creamos la animación que va intercambiando las texturas
         // para que parezca que la mosca va volando
@@ -294,7 +294,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         mosquita.physicsBody = SKPhysicsBody(circleOfRadius: texturaMosca1.size().height / 2)
         
         // Al inicial la mosquita está quieta
-        mosquita.physicsBody?.isDynamic = false
+        mosquita.physicsBody?.isDynamic = true
         
         // Añadimos su categoría
         mosquita.physicsBody!.categoryBitMask = tipoNodo.mosquita.rawValue
@@ -363,11 +363,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     @objc func addHazard() {
         // Random image
+
         hazards = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: hazards) as! [String]
         let imageName = hazards[0]
         let hazard = SKSpriteNode(imageNamed: imageName)
         hazard.setScale(0.1)
-        
+        let deleteHazards = SKAction.removeFromParent()
+
         hazard.userData = [ "hazardType": imageName ]
         // Random position
         let randomHazardPosition = GKRandomDistribution(lowestValue: Int(self.frame.minY + hazard.size.height), highestValue: Int(self.frame.maxY + hazard.size.height))
@@ -377,7 +379,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         hazard.position = CGPoint(x:self.frame.maxX  ,y: position)
         // Physical properties
     let mine = SKTexture(imageNamed: "mine")
-        hazard.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "mine"), alphaThreshold: 0.5, size: hazard.size)
+        hazard.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "mine"), alphaThreshold: 0.5, size: mine.size())
         hazard.physicsBody?.isDynamic = true
         // Collision mask
         hazard.physicsBody?.categoryBitMask = hazardCategory
