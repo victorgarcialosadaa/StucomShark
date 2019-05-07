@@ -13,7 +13,8 @@ import GameplayKit
 class GameScene: SKScene, SKPhysicsContactDelegate {
     // Alien spawning
     var gameTimer:Timer!
-    var hazards = [ "mine", "torpedo"]
+    var hazards = ["mine","torpedo"]
+    //x3 chance of torpedo spawning
 
         // Collision categories
     let photonTorperdoCategory:UInt32 = 0x1 << 0
@@ -49,7 +50,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // Todo elemento en pantalla es un nodo
     
     // Nodo de tipo SpriteKit para la mosquita
-    var mosquita = SKSpriteNode()
+    var shark = SKSpriteNode()
     // Nodo para el fondo de la pantalla
     var fondo = SKSpriteNode()
     
@@ -76,6 +77,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // timer para crear tubos y huecos
     var timer = Timer()
+    var mineTimer = Timer()
+    var torpedoTimer = Timer()
+
     // boolean para saber si el juego está activo o finalizado
     var gameOver = false
     
@@ -86,7 +90,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // Enumeración de los nodos que pueden colisionar
     // se les debe representar con números potencia de 2
     enum tipoNodo: UInt32 {
-        case mosquita = 1       // La mosquita colisiona
+        case shark = 1       // La mosquita colisiona
         case tuboSuelo = 2      // Si choca con el suelo o tubería perderá
         case huecoTubos = 4     // si pasa entre las tuberías subirá la puntuación
     }
@@ -101,8 +105,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func reiniciar() {
         // Creamos los tubos de manera constante e indefinidamente
-        timer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(self.setObstacles), userInfo: nil, repeats: true)
-    let hazardTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(self.addHazard), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.setObstacles), userInfo: nil, repeats: true)
+    mineTimer = Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(self.addMine), userInfo: nil, repeats: true)
+        torpedoTimer = Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(self.addTorpedo), userInfo: nil, repeats: true)
+
         
         // Ponemos la etiqueta con la puntuacion
         ponerPuntuacion()
@@ -113,7 +119,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         sharkAnimation()
         // Definimos la altura de los huecos
-        alturaHueco = mosquita.size.height * 2
+        alturaHueco = shark.size.height * 3
         crearFondoConAnimacion()
         crearSuelo()
         setObstacles()
@@ -164,26 +170,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         hook.physicsBody!.categoryBitMask = tipoNodo.tuboSuelo.rawValue
         
         // con quien colisiona
-        hook.physicsBody!.collisionBitMask = tipoNodo.mosquita.rawValue
+        hook.physicsBody!.collisionBitMask = tipoNodo.shark.rawValue
         
         // Hace contacto con
-        hook.physicsBody!.contactTestBitMask = tipoNodo.mosquita.rawValue
+        hook.physicsBody!.contactTestBitMask = tipoNodo.shark.rawValue
         
         hook.run(moveDeleteObstacles)
         
         self.addChild(hook)
         
-        texturaTubo2 = SKTexture(imageNamed: "ship.png")
-        tubo2.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "ship"), alphaThreshold: 0.5, size: tubo2.size)
-        tubo2.position = CGPoint(x: self.frame.midX + self.frame.width, y: self.frame.midY - texturaTubo2.size().height / 2 - alturaHueco + compensacionTubos)
-        tubo2.zPosition = 0
-        tubo2.run(moveDeleteObstacles)
-        tubo2.physicsBody = SKPhysicsBody(rectangleOf: texturaTubo2.size())
-        tubo2.physicsBody!.isDynamic = false
-        tubo2.physicsBody!.categoryBitMask = tipoNodo.tuboSuelo.rawValue
-        tubo2.physicsBody!.collisionBitMask = tipoNodo.mosquita.rawValue
-        tubo2.physicsBody!.contactTestBitMask = tipoNodo.mosquita.rawValue
-        self.addChild(tubo2)
+      let shipTexture = SKTexture(imageNamed: "ship.png")
+        let ship = SKSpriteNode(texture: shipTexture)
+        ship.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "ship"), alphaThreshold: 0.5, size: ship.size)
+        ship.position = CGPoint(x: self.frame.midX + self.frame.width, y: self.frame.midY - shipTexture.size().height / 2 - alturaHueco + compensacionTubos)
+        ship.zPosition = 0
+        ship.run(moveDeleteObstacles)
+        ship.physicsBody = SKPhysicsBody(rectangleOf: shipTexture.size())
+        ship.physicsBody!.isDynamic = false
+        ship.physicsBody!.categoryBitMask = tipoNodo.tuboSuelo.rawValue
+        ship.physicsBody!.collisionBitMask = tipoNodo.shark.rawValue
+        ship.physicsBody!.contactTestBitMask = tipoNodo.shark.rawValue
+        self.addChild(ship)
         
         // Hueco entre los tubos
         let nodoHueco = SKSpriteNode()
@@ -197,7 +204,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // no queremos que colisione para que la mosca pueda pasar
         nodoHueco.physicsBody!.collisionBitMask = 0
         // Hace contacto con la mosquita
-        nodoHueco.physicsBody!.contactTestBitMask = tipoNodo.mosquita.rawValue
+        nodoHueco.physicsBody!.contactTestBitMask = tipoNodo.shark.rawValue
         
         nodoHueco.zPosition = 1
         nodoHueco.run(moveDeleteObstacles)
@@ -216,9 +223,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Categoría para collision
         suelo.physicsBody!.categoryBitMask = tipoNodo.tuboSuelo.rawValue
         // Colisiona con la mosquita
-        suelo.physicsBody!.collisionBitMask = tipoNodo.mosquita.rawValue
+        suelo.physicsBody!.collisionBitMask = tipoNodo.shark.rawValue
         // contacto con el suelo
-        suelo.physicsBody!.contactTestBitMask = tipoNodo.mosquita.rawValue
+        suelo.physicsBody!.contactTestBitMask = tipoNodo.shark.rawValue
         
         self.addChild(suelo)
     }
@@ -267,10 +274,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func sharkAnimation() {
         // Asignamos las texturas de la mosquita
-        texturaMosca1 = SKTexture(imageNamed: "sharkv1.png")
-        texturaMosca2 = SKTexture(imageNamed: "sharkv1.png")
-        texturaMosca3 = SKTexture(imageNamed: "sharkv4.png")
-        texturaMosca4 = SKTexture(imageNamed: "sharkv4.png")
+        texturaMosca1 = SKTexture(imageNamed: "shark1.png")
+        texturaMosca2 = SKTexture(imageNamed: "shark2.png")
+        texturaMosca3 = SKTexture(imageNamed: "shark3.png")
+        texturaMosca4 = SKTexture(imageNamed: "shark4.png")
         
         // Creamos la animación que va intercambiando las texturas
         // para que parezca que la mosca va volando
@@ -283,35 +290,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let animacionInfinita = SKAction.repeatForever(animacion)
         
         // Le ponemos la textura inicial al nodo
-        mosquita = SKSpriteNode(texture: texturaMosca1)
-        // Posición inicial en la que ponemos a la mosquita
-        // (0.0, 0.0) es el medio de la pantalla
-        // Se puede poner 0.0, 0.0 o bien con referencia a la pantalla
-        mosquita.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
-        
-        // Le damos propiedades físicias a nuestra mosquita
-        // Le damos un cuerpo circular
-        mosquita.physicsBody = SKPhysicsBody(circleOfRadius: texturaMosca1.size().height / 2)
+        shark = SKSpriteNode(texture: texturaMosca1)
+
+        shark.position = CGPoint(x: self.frame.minX+250, y: self.frame.midY)
+
+        shark.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "shark1"), alphaThreshold: 0.5, size: shark.size)
         
         // Al inicial la mosquita está quieta
-        mosquita.physicsBody?.isDynamic = true
+        shark.physicsBody?.isDynamic = true
         
         // Añadimos su categoría
-        mosquita.physicsBody!.categoryBitMask = tipoNodo.mosquita.rawValue
+        shark.physicsBody!.categoryBitMask = tipoNodo.shark.rawValue
         
         // Indicamos la categoría de colisión con el suelo/tubos
-        mosquita.physicsBody!.collisionBitMask = tipoNodo.tuboSuelo.rawValue
+        shark.physicsBody!.collisionBitMask = tipoNodo.tuboSuelo.rawValue
         
         // Hace contacto con (para que nos avise)
-        mosquita.physicsBody!.contactTestBitMask = tipoNodo.tuboSuelo.rawValue | tipoNodo.huecoTubos.rawValue
+        shark.physicsBody!.contactTestBitMask = tipoNodo.tuboSuelo.rawValue | tipoNodo.huecoTubos.rawValue
         
         // Aplicamos la animación a la mosquita
-        mosquita.run(animacionInfinita)
+        shark.run(animacionInfinita)
         
-        mosquita.zPosition = 0
+        shark.zPosition = 0
         
         // Ponemos la mosquita en la escena
-        self.addChild(mosquita)
+        self.addChild(shark)
     }
     
     
@@ -319,14 +322,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if gameOver == false {
             // En cuanto el usuario toque la pantalla le damos dinámica a la mosquita (caerá)
-            mosquita.physicsBody!.isDynamic = true
+            shark.physicsBody!.isDynamic = true
             
             // Le damos una velocidad a la mosquita para que la velocidad al caer sea constante
-            mosquita.physicsBody!.velocity = CGVector(dx: 0, dy: 0)
+            shark.physicsBody!.velocity = CGVector(dx: 0, dy: 0)
             
             // Le aplicamos un impulso a la mosquita para que suba cada vez que pulsemos la pantalla
             // Y así poder evitar que se caiga para abajo
-            mosquita.physicsBody!.applyImpulse(CGVector(dx: 0, dy: 500))
+            shark.physicsBody!.applyImpulse(CGVector(dx: 0, dy: 500))
         } else {
             // si toca la pantalla cuando el juego ha acabado, lo reiniciamos para volver a jugar
             gameOver = false
@@ -344,7 +347,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let cuerpoA = contact.bodyA
         let cuerpoB = contact.bodyB
         // Miramos si la mosca ha pasado por el hueco
-        if (cuerpoA.categoryBitMask == tipoNodo.mosquita.rawValue && cuerpoB.categoryBitMask == tipoNodo.huecoTubos.rawValue) || (cuerpoA.categoryBitMask == tipoNodo.huecoTubos.rawValue && cuerpoB.categoryBitMask == tipoNodo.mosquita.rawValue) {
+        if (cuerpoA.categoryBitMask == tipoNodo.shark.rawValue && cuerpoB.categoryBitMask == tipoNodo.huecoTubos.rawValue) || (cuerpoA.categoryBitMask == tipoNodo.huecoTubos.rawValue && cuerpoB.categoryBitMask == tipoNodo.shark.rawValue) {
             puntuacion += 1
             labelPuntuacion.text = String(puntuacion)
         } else {
@@ -355,55 +358,115 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.speed = 0
             // Paramos el timer
             timer.invalidate()
+            mineTimer.invalidate()
+            torpedoTimer.invalidate()
+            mineTimer.invalidate()
+
             labelPuntuacion.text = "Game Over"
         }
         
     }
    
     
-    @objc func addHazard() {
-        // Random image
-
+    /*@objc func addHazard() {
+    
         hazards = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: hazards) as! [String]
         let imageName = hazards[0]
         let hazard = SKSpriteNode(imageNamed: imageName)
-        hazard.setScale(0.1)
-        let deleteHazards = SKAction.removeFromParent()
-
-        hazard.userData = [ "hazardType": imageName ]
+       // hazard.setScale(0.1)
+        
         // Random position
-        let randomHazardPosition = GKRandomDistribution(lowestValue: Int(self.frame.minY + hazard.size.height), highestValue: Int(self.frame.maxY + hazard.size.height))
+        let randomHazardPosition = GKRandomDistribution(lowestValue: Int(self.frame.minY + hazard.size.height), highestValue: Int(self.frame.maxY - hazard.size.height))
         let position = CGFloat(randomHazardPosition.nextInt())
         hazard.zPosition = 1
-        //hazard.position = CGPoint(x: self.frame.maxX + hazard.size.width, y: position)
-        hazard.position = CGPoint(x:self.frame.maxX  ,y: position)
+        hazard.position = CGPoint(x: self.frame.maxX + hazard.size.width, y: position)
         // Physical properties
-    let mine = SKTexture(imageNamed: "mine")
-        hazard.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "mine"), alphaThreshold: 0.5, size: mine.size())
-        hazard.physicsBody?.isDynamic = true
-        // Collision mask
+    
         hazard.physicsBody?.categoryBitMask = hazardCategory
         hazard.physicsBody?.contactTestBitMask = photonTorperdoCategory | playerCategory
         hazard.physicsBody?.collisionBitMask = 0
         hazard.physicsBody?.affectedByGravity = false
-        self.addChild(hazard)
-        // Alien basic movement
-        let animationDuration:TimeInterval = 6
-        let actionMove = SKAction.moveBy(x:-self.frame.maxX, y: 0, duration: animationDuration)
+
+        let animationDuration:TimeInterval = 10
+        let actionMove = SKAction.moveBy(x:self.frame.minX, y: position, duration: animationDuration)
         let actionRemove = SKAction.removeFromParent()
-        let actionLeftRight = SKAction.sequence([ actionMove, actionRemove ])
-        if imageName != "alien4" {
-            // SIMPLE: Top-down movement & Remove after
-            hazard.run(actionLeftRight)
+        let actionRightLeft = SKAction.sequence([actionMove, actionRemove])
+        
+     self.addChild(hazard)
+
+        if imageName != "mine" {
+            let torpedo = SKTexture(imageNamed: "torpedo")
+            hazard.physicsBody = SKPhysicsBody(texture: torpedo, alphaThreshold: 0.5, size: torpedo.size())
+            hazard.physicsBody?.isDynamic = true
+
+            hazard.run(actionRightLeft)
         }
         else {
-            // COMPLEX: SIMPLE + Left-to-right oscillation & Sprite animation
-            // Load from Actions.sks
-            let alien4 = SKAction.init(named: "Alien4")!
-            // Execute simultaneously
-            hazard.run(SKAction.group([alien4, actionLeftRight]))
+            let mine = SKTexture(imageNamed: "mine")
+            hazard.physicsBody = SKPhysicsBody(texture: mine, alphaThreshold: 0.5, size: mine.size())
+            hazard.physicsBody?.isDynamic = true
+
+            hazard.run(actionRightLeft)
+
         }
+        
+
+    }*/
+    
+        @objc func  addMine() {
+        let mine = SKSpriteNode(imageNamed: "mine")
+            mine.setScale(0.1)
+            mine.zPosition = 1
+            mine.physicsBody?.affectedByGravity = false
+
+        let randomMinePosition = GKRandomDistribution(lowestValue: Int(self.frame.minY), highestValue: Int(self.frame.maxY))
+        let position = CGFloat(randomMinePosition.nextInt())
+        
+        mine.position = CGPoint(x: self.frame.maxX - mine.size.width, y:position)
+        // Physical properties
+        mine.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "mine"), alphaThreshold: 0.5, size: mine.size)
+        mine.physicsBody?.isDynamic = false
+        // Collision mask
+        mine.physicsBody?.categoryBitMask = hazardCategory
+        mine.physicsBody?.contactTestBitMask = photonTorperdoCategory | playerCategory
+        mine.physicsBody?.collisionBitMask = 0
+        self.addChild(mine)
+        // Alien basic movement
+        let animationDuration:TimeInterval = 10
+        let actionMove = SKAction.moveBy(x: -self.frame.maxX , y:0, duration: animationDuration )
+        let actionRemove = SKAction.removeFromParent()
+        let actionLeftRight = SKAction.sequence([ actionMove, actionRemove ])
+    
+            mine.run(actionLeftRight)
+        }
+    @objc func  addTorpedo() {
+        let torpedo = SKSpriteNode(imageNamed: "torpedo")
+        torpedo.setScale(0.1)
+        torpedo.zPosition = 1
+        torpedo.physicsBody?.affectedByGravity = false
+
+        let randomMinePosition = GKRandomDistribution(lowestValue: Int(self.frame.minY), highestValue: Int(self.frame.maxY))
+        let position = CGFloat(randomMinePosition.nextInt())
+    
+        torpedo.position = CGPoint(x: self.frame.maxX - torpedo.size.width, y:position)
+        // Physical properties
+        torpedo.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "torpedo"), alphaThreshold: 0.5, size: torpedo.size)
+        torpedo.physicsBody?.isDynamic = false
+        // Collision mask
+        torpedo.physicsBody?.categoryBitMask = hazardCategory
+        torpedo.physicsBody?.contactTestBitMask = photonTorperdoCategory | playerCategory
+        torpedo.physicsBody?.collisionBitMask = 0
+        self.addChild(torpedo)
+        // Alien basic movement
+        let animationDuration:TimeInterval = 10
+        let actionMove = SKAction.moveBy(x: -self.frame.maxX , y:0, duration: animationDuration )
+        let actionRemove = SKAction.removeFromParent()
+        let actionLeftRight = SKAction.sequence([ actionMove, actionRemove ])
+        
+        torpedo.run(actionLeftRight)
     }
+    
+    
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
