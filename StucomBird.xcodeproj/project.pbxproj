@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		330C0A3F22832CF500487F30 /* best-vgm-811-super-mario-bros-underwater-theme.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 330C0A3E22832CF400487F30 /* best-vgm-811-super-mario-bros-underwater-theme.mp3 */; };
 		33138AC0207CCFDE0035F4E3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33138ABF207CCFDE0035F4E3 /* AppDelegate.swift */; };
 		33138AC2207CCFDE0035F4E3 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 33138AC1207CCFDE0035F4E3 /* GameScene.sks */; };
 		33138AC4207CCFDE0035F4E3 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 33138AC3207CCFDE0035F4E3 /* Actions.sks */; };
@@ -19,6 +20,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		330C0A3E22832CF400487F30 /* best-vgm-811-super-mario-bros-underwater-theme.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = "best-vgm-811-super-mario-bros-underwater-theme.mp3"; path = "../../Downloads/best-vgm-811-super-mario-bros-underwater-theme.mp3"; sourceTree = "<group>"; };
+		330C0A4022832CFF00487F30 /* waterMusic.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = waterMusic.mp3; sourceTree = "<group>"; };
 		33138ABC207CCFDE0035F4E3 /* StucomBird.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StucomBird.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		33138ABF207CCFDE0035F4E3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		33138AC1207CCFDE0035F4E3 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -48,6 +51,7 @@
 			children = (
 				33138ABE207CCFDE0035F4E3 /* StucomBird */,
 				33138ABD207CCFDE0035F4E3 /* Products */,
+				330C0A3E22832CF400487F30 /* best-vgm-811-super-mario-bros-underwater-theme.mp3 */,
 			);
 			sourceTree = "<group>";
 		};
@@ -62,6 +66,7 @@
 		33138ABE207CCFDE0035F4E3 /* StucomBird */ = {
 			isa = PBXGroup;
 			children = (
+				330C0A4022832CFF00487F30 /* waterMusic.mp3 */,
 				33138ABF207CCFDE0035F4E3 /* AppDelegate.swift */,
 				33138AC1207CCFDE0035F4E3 /* GameScene.sks */,
 				33138AC3207CCFDE0035F4E3 /* Actions.sks */,
@@ -135,6 +140,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				330C0A3F22832CF500487F30 /* best-vgm-811-super-mario-bros-underwater-theme.mp3 in Resources */,
 				33138ACB207CCFDE0035F4E3 /* Main.storyboard in Resources */,
 				33138AC2207CCFDE0035F4E3 /* GameScene.sks in Resources */,
 				33138ACD207CCFDE0035F4E3 /* Assets.xcassets in Resources */,

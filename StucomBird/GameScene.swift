@@ -8,7 +8,7 @@
 
 import SpriteKit
 import GameplayKit
-
+import AVFoundation
 // Necesario para tratar con colisiones SKPhysicsContactDelegate
 class GameScene: SKScene, SKPhysicsContactDelegate {
     // Alien spawning
@@ -21,39 +21,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let hazardCategory:UInt32 = 0x1 << 1
     let playerCategory:UInt32 = 0x1 << 2
     
-    // Guía oficial de Apple sobre SpriteKit
-    /* https://developer.apple.com/documentation/spritekit */
     
-    // Scene: es el nodo raíz de todos los objetos SpriteKit que se desplegarán en una vista.
-    // Para desplegar una "scene" tienes que presentarla desde un objeto SKView
-    // Node: un nodo es el bloque fundamental de construcción de casi todo el contenido en SpriteKit.
-    // Un nodo puede estar vacío y no dibujar nada en pantalla, para poder dibujar algo en pantalla
-    // hay que utilizar subclases de SKNode, por ejemplo SKSpriteNode para dibujar un sprite.
-    // SpriteNode: Para crear un SpriteNode, es necesario una textura (imagen) y de un Frame, el cual
-    // contiene un rectángulo que define el área que cubrirá el SpriteNode
-    // Todo SpriteNode tiene una posición (position) y un punto de anclado (Anchor Point)
-    // El punto de anclado de un nodo Sprite es la propiedad que determina que punto de su
-    // "Frame" está situado en la posición del sprite (por defecto - (0.5, 0.5) en medio - va de 0.0 a 1.0)
-    
-    // La propiedad categoryBitMask es un número que define el tipo de objeto que el cuerpo físico del nodo
-    // tendrá y es considerado para las colisiones y contactos.
-    // La propiedad collisionBitMask es un número que define con qué categorías de objeto este nodo debería colisionar
-    // La propiedad contactTestBitMask es un número que define qué colisiones no serán notificadas
-    // Si le das a un nodo números de Collision BitMask pero no le das números de contactTestBitMask, significa
-    // que los nodos podrán colisionar pero no tendrás manera de saber cuándo ocurrió en código (no se notifica al sistema)
-    // Si haces lo contraro (no collisionBitMask pero si contactTestBitMask), no chocarán o colisionarán, pero
-    // el sistema te podrá notificar el momento en que tuvieron contacto.
-    // Si a las dos propiedades les das valores entonces notificará y a la vez los nodos podrán colisionar
-    // De forma predeterminada los cuerpos físicos tienen su propiedad collisionBitMask a todo y su
-    // contactBitMask a nada
-    
-    // Todo elemento en pantalla es un nodo
-    
-    // Nodo de tipo SpriteKit para la mosquita
     var shark = SKSpriteNode()
     // Nodo para el fondo de la pantalla
     var fondo = SKSpriteNode()
     
+    var audioPlayer = AVAudioPlayer()
     // Nodo label para la puntuacion
     var labelPuntuacion = SKLabelNode()
     var puntuacion = 0
@@ -97,17 +70,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // Función equivalente a viewDidLoad
     override func didMove(to view: SKView) {
+        playMusic()
         // Nos encargamos de las colisiones de nuestros nodos
         self.physicsWorld.contactDelegate = self
        reiniciar()
        
     }
     
+    func playMusic(){
+        guard let url = Bundle.main.url(forResource:"waterMusic", withExtension: "mp3")
+            else {return}
+        do{try AVAudioSession.sharedInstance().setActive(true)
+            audioPlayer = try AVAudioPlayer(contentsOf: url, fileTypeHint:  AVFileType.mp3.rawValue)
+            audioPlayer.numberOfLoops = -1
+            audioPlayer.play()
+        } catch let error {print(error.localizedDescription)}
+        
+    }
+    
     func reiniciar() {
+
         // Creamos los tubos de manera constante e indefinidamente
-        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.setObstacles), userInfo: nil, repeats: true)
-    mineTimer = Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(self.addMine), userInfo: nil, repeats: true)
-        torpedoTimer = Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(self.addTorpedo), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(self.setObstacles), userInfo: nil, repeats: true)
+    mineTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(self.addMine), userInfo: nil, repeats: true)
+        torpedoTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(self.addTorpedo), userInfo: nil, repeats: true)
 
         
         // Ponemos la etiqueta con la puntuacion
@@ -422,7 +408,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let randomMinePosition = GKRandomDistribution(lowestValue: Int(self.frame.minY), highestValue: Int(self.frame.maxY))
         let position = CGFloat(randomMinePosition.nextInt())
         
-        mine.position = CGPoint(x: self.frame.maxX - mine.size.width, y:position)
+        mine.position = CGPoint(x: self.frame.maxX + mine.size.width, y:position)
         // Physical properties
         mine.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "mine"), alphaThreshold: 0.5, size: mine.size)
         mine.physicsBody?.isDynamic = false
@@ -432,13 +418,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         mine.physicsBody?.collisionBitMask = 0
         self.addChild(mine)
         // Alien basic movement
-        let animationDuration:TimeInterval = 10
-        let actionMove = SKAction.moveBy(x: -self.frame.maxX , y:0, duration: animationDuration )
+        let animationDuration:TimeInterval = 30
+            let actionMove = SKAction.moveBy(x: -self.frame.maxX , y:0, duration: animationDuration )
         let actionRemove = SKAction.removeFromParent()
         let actionLeftRight = SKAction.sequence([ actionMove, actionRemove ])
     
             mine.run(actionLeftRight)
         }
+    
     @objc func  addTorpedo() {
         let torpedo = SKSpriteNode(imageNamed: "torpedo")
         torpedo.setScale(0.1)
@@ -448,7 +435,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let randomMinePosition = GKRandomDistribution(lowestValue: Int(self.frame.minY), highestValue: Int(self.frame.maxY))
         let position = CGFloat(randomMinePosition.nextInt())
     
-        torpedo.position = CGPoint(x: self.frame.maxX - torpedo.size.width, y:position)
+        torpedo.position = CGPoint(x: self.frame.maxX + torpedo.size.width, y:position)
         // Physical properties
         torpedo.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "torpedo"), alphaThreshold: 0.5, size: torpedo.size)
         torpedo.physicsBody?.isDynamic = false
@@ -458,7 +445,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         torpedo.physicsBody?.collisionBitMask = 0
         self.addChild(torpedo)
         // Alien basic movement
-        let animationDuration:TimeInterval = 10
+        let animationDuration:TimeInterval = 5
         let actionMove = SKAction.moveBy(x: -self.frame.maxX , y:0, duration: animationDuration )
         let actionRemove = SKAction.removeFromParent()
         let actionLeftRight = SKAction.sequence([ actionMove, actionRemove ])
